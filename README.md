@@ -18,3 +18,5 @@ To run the OS in a virtual environment, simply execute:
 ```bash
 make all & make run
 ```
+
+![OS Output](git/OS_output_qemu.png)
