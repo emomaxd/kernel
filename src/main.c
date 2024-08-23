@@ -94,29 +94,57 @@ static void hcf(void) {
     }
 }
 
+// Draw a filled rectangle on the framebuffer
+void draw_rect(size_t x, size_t y, size_t width, size_t height, uint32_t color) {
+    // Ensure we have a framebuffer
+    if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
+        hcf();
+    }
+
+    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+    uint32_t *fb_ptr = (uint32_t *)framebuffer->address;
+    size_t pitch = framebuffer->pitch / 4; // in pixels
+    size_t fb_width = framebuffer->width;
+    size_t fb_height = framebuffer->height;
+
+    // Clip the rectangle to fit within the framebuffer bounds
+    if (x >= fb_width || y >= fb_height) return; // Rectangle is completely outside the framebuffer
+    if (x + width > fb_width) width = fb_width - x;
+    if (y + height > fb_height) height = fb_height - y;
+
+    // Draw the rectangle
+    for (size_t row = y; row < y + height; row++) {
+        for (size_t col = x; col < x + width; col++) {
+            fb_ptr[row * pitch + col] = color;
+        }
+    }
+}
+
+
 // The following will be our kernel's entry point.
 // If renaming kmain() to something else, make sure to change the
 // linker script accordingly.
 void kmain(void) {
-    // Ensure the bootloader actually understands our base revision (see spec).
     if (LIMINE_BASE_REVISION_SUPPORTED == false) {
         hcf();
     }
 
-    // Ensure we got a framebuffer.
-    if (framebuffer_request.response == NULL
-     || framebuffer_request.response->framebuffer_count < 1) {
+    if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
         hcf();
     }
 
     // Fetch the first framebuffer.
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
-    // Note: we assume the framebuffer model is RGB with 32-bit pixels.
-    for (size_t i = 0; i < 100; i++) {
-        volatile uint32_t *fb_ptr = framebuffer->address;
-        fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
-    }
+    // Define rectangle parameters
+    size_t rect_x = 50;
+    size_t rect_y = 50;
+    size_t rect_width = 200;
+    size_t rect_height = 100;
+    uint32_t rect_color = 0xFF0000; // Red
+
+    // Draw a rectangle on the framebuffer
+    draw_rect(rect_x, rect_y, rect_width, rect_height, rect_color);
 
     // We're done, just hang...
     hcf();
