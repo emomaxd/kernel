@@ -16,16 +16,5 @@ If you encounter any errors, refer to the `setup_commands.md` file for troublesh
 To run the OS in a virtual environment, simply execute:
 
 ```bash
-./run.sh
+make all & make run
 ```
-
-## Burning into Flash
-
-1. Identify the address of your flash drive (e.g., `/dev/sdX`).
-2. Use the `prepare_flash.sh` script with two command-line parameters:
-
-    ```bash
-    sudo ./prepare_flash.sh /dev/sdX path/to/OS.bin
-    ```
-
-3. Once the OS is burned onto the flash drive, you can boot it on real hardware.

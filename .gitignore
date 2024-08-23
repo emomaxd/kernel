@@ -1,0 +1,13 @@
+# Compiled files
+*.o
+*.bin
+*.elf
+*.a
+*.out
+
+# Temp
+*.tmp
+*.log
+
+*.swp
+.DS_Store
