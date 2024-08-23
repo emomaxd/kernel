@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project involves developing a custom operating system (OS) that includes a bootloader and a kernel. The OS is written in Assembly and C and is intended to run on both real hardware and virtual machines. The project features a basic bootloader using GRUB, a kernel entry point, and kernel code with a simple print function for demonstration purposes.
+This project involves developing a custom operating system (OS) that includes a bootloader and a kernel. The OS is written in Assembly and C and is intended to run on both real hardware and virtual machines. The project features a basic bootloader using Limine.
 
 
 ## Building & Setup
@@ -23,13 +23,19 @@ make all & make run
 ## Burning into Flash
 
 1. Identify the address of your flash drive (e.g., `/dev/sdX`).
-2. Use the `prepare_flash.sh` script with two command-line parameters:
+2. Run create_iso.sh & flash.sh, this will create image.iso & image.hdd
 
     ```bash
-    sudo ./scripts/prepare_flash.sh OS.bin /dev/sdX
+    ./create_iso.sh
+    ./flash.sh
+    ```
+3. Use the `prepare_flash.sh` script with two command-line parameters:
+
+    ```bash
+    sudo ./prepare_flash.sh image.hdd /dev/sdX
     ```
 
-3. Once the OS is burned onto the flash drive, you can boot it on real hardware.
+4. Once the OS is burned onto the flash drive, you can boot it on real hardware.
 
 ---
 
