@@ -2,7 +2,7 @@
 #include "memory/memory.h"
 
 // Entry point for the program
-extern void main() {
+extern void kernel_main(void) {
 
     memory_init((void*)0, 0);
     // Example usage of the functions

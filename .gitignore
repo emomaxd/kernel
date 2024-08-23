@@ -11,3 +11,7 @@
 
 *.swp
 .DS_Store
+
+# OS image files
+*.iso
+isodir/
