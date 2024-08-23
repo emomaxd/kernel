@@ -122,4 +122,4 @@ clean:
 # Run the image using QEMU
 .PHONY: run
 run:
-	qemu-system-x86_64 -cdrom image.iso -m 512
+	./create_iso.sh && qemu-system-x86_64 -cdrom image.iso -m 512
