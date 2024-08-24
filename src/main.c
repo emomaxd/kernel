@@ -3,17 +3,17 @@
 #include <stdbool.h>
 #include <limine.h>
 
-// Set the base revision to 2, this is recommended as this is the latest
+// Set the base revision to 2, as recommended, since this is the latest
 // base revision described by the Limine boot protocol specification.
-// See specification for further info.
+// See the specification for further information.
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
 
 // The Limine requests can be placed anywhere, but it is important that
-// the compiler does not optimise them away, so, usually, they should
-// be made volatile or equivalent, _and_ they should be accessed at least
-// once or marked as used with the "used" attribute as done here.
+// the compiler does not optimize them away, so they should be made
+// volatile or equivalent and accessed at least once, or marked as used
+// with the "used" attribute as done here.
 
 __attribute__((used, section(".requests")))
 static volatile struct limine_framebuffer_request framebuffer_request = {
@@ -21,8 +21,8 @@ static volatile struct limine_framebuffer_request framebuffer_request = {
     .revision = 0
 };
 
-// Finally, define the start and end markers for the Limine requests.
-// These can also be moved anywhere, to any .c file, as seen fit.
+// Define the start and end markers for the Limine requests.
+// These can also be moved anywhere, to any .c file, as needed.
 
 __attribute__((used, section(".requests_start_marker")))
 static volatile LIMINE_REQUESTS_START_MARKER;
@@ -30,12 +30,18 @@ static volatile LIMINE_REQUESTS_START_MARKER;
 __attribute__((used, section(".requests_end_marker")))
 static volatile LIMINE_REQUESTS_END_MARKER;
 
-// GCC and Clang reserve the right to generate calls to the following
-// 4 functions even if they are not directly called.
-// Implement them as the C specification mandates.
-// DO NOT remove or rename these functions, or stuff will eventually break!
-// They CAN be moved to a different .c file.
+// Port I/O functions
+static inline void outw(uint16_t port, uint16_t value) {
+    asm volatile ("outw %0, %1" : : "a"(value), "Nd"(port));
+}
 
+static inline uint8_t inb(uint16_t port) {
+    uint8_t result;
+    asm volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
+    return result;
+}
+
+// Basic memory functions
 void *memcpy(void *dest, const void *src, size_t n) {
     uint8_t *pdest = (uint8_t *)dest;
     const uint8_t *psrc = (const uint8_t *)src;
@@ -87,16 +93,24 @@ int memcmp(const void *s1, const void *s2, size_t n) {
     return 0;
 }
 
-// Halt and catch fire function.
+// Halt and catch fire function
 static void hcf(void) {
     for (;;) {
         asm ("hlt");
     }
 }
 
+// ACPI shutdown function
+static inline void acpi_shutdown(void) {
+    outw(0xB004, 0x2000);  // Common ACPI shutdown port
+
+    // Alternative ports if the first doesn't work
+    outw(0x604, 0x2000);   // Common for QEMU
+    outw(0x4004, 0x3400);  // Another common port
+}
+
 // Draw a filled rectangle on the framebuffer
 void draw_rect(size_t x, size_t y, size_t width, size_t height, uint32_t color) {
-    // Ensure we have a framebuffer
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
         hcf();
     }
@@ -120,10 +134,7 @@ void draw_rect(size_t x, size_t y, size_t width, size_t height, uint32_t color) 
     }
 }
 
-
-// The following will be our kernel's entry point.
-// If renaming kmain() to something else, make sure to change the
-// linker script accordingly.
+// Kernel entry point
 void kmain(void) {
     if (LIMINE_BASE_REVISION_SUPPORTED == false) {
         hcf();
@@ -146,6 +157,15 @@ void kmain(void) {
     // Draw a rectangle on the framebuffer
     draw_rect(rect_x, rect_y, rect_width, rect_height, rect_color);
 
-    // We're done, just hang...
+    // Keyboard loop
+    while (true) {
+        uint8_t scancode = inb(0x60); // Read the keyboard scancode
+
+        if (scancode == 0x01) { // 0x01 is the scancode for the ESC key
+            acpi_shutdown(); // Shutdown the computer
+        }
+    }
+
+    // If shutdown fails, halt the CPU in an infinite loop
     hcf();
 }
