@@ -1,7 +1,6 @@
-#include "fb_print.h"
+#include "kprint.h"
 #include <stdarg.h>
 #include <stdbool.h>
-
 #include "font.h"
 
 // Assuming these are defined elsewhere
@@ -9,6 +8,39 @@ extern uint32_t *framebuffer_ptr;
 extern size_t framebuffer_width;
 extern size_t framebuffer_height;
 extern size_t framebuffer_pitch;
+
+// Function to convert integer to string
+void itoa(int num, char *str, int base) {
+    char digits[] = "0123456789ABCDEF";
+    char buffer[32];
+    int i = 0, j;
+
+    if (num == 0) {
+        str[0] = '0';
+        str[1] = '\0';
+        return;
+    }
+
+    while (num) {
+        buffer[i++] = digits[num % base];
+        num /= base;
+    }
+
+    for (j = 0; j < i; j++) {
+        str[j] = buffer[i - j - 1];
+    }
+    str[i] = '\0';
+}
+
+// Function to convert string to integer (base 10)
+int atoi(const char *str) {
+    int result = 0;
+    while (*str) {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+    return result;
+}
 
 // Basic function to put a single character on the framebuffer
 static void put_char(size_t x, size_t y, char c, uint32_t color) {
@@ -36,7 +68,7 @@ static void put_char(size_t x, size_t y, char c, uint32_t color) {
 }
 
 // Function to print a string on the framebuffer
-void fb_print(const char *str, size_t x, size_t y, uint32_t color) {
+void kprint(const char *str, size_t x, size_t y, uint32_t color) {
     while (*str) {
         put_char(x, y, *str++, color);
         x += 8; // Move to the next character position
@@ -47,35 +79,12 @@ void fb_print(const char *str, size_t x, size_t y, uint32_t color) {
     }
 }
 
-// Helper function to convert integers to string
-static void int_to_str(int num, char *str, int base) {
-    char digits[] = "0123456789ABCDEF";
-    char buffer[32];
-    int i = 0, j;
-    
-    if (num == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
-    }
-    
-    while (num) {
-        buffer[i++] = digits[num % base];
-        num /= base;
-    }
-    
-    for (j = 0; j < i; j++) {
-        str[j] = buffer[i - j - 1];
-    }
-    str[i] = '\0';
-}
-
 // Function to print formatted data on the framebuffer
-void fb_printf(size_t x, size_t y, uint32_t color, const char *format, ...) {
+void kprintf(size_t x, size_t y, uint32_t color, const char *format, ...) {
     char buffer[256];
     va_list args;
     va_start(args, format);
-    
+
     char *p = buffer;
     char *str;
     int i;
@@ -85,7 +94,7 @@ void fb_printf(size_t x, size_t y, uint32_t color, const char *format, ...) {
             switch (*format) {
                 case 'd':
                     i = va_arg(args, int);
-                    int_to_str(i, p, 10);
+                    itoa(i, p, 10);
                     while (*p) p++;
                     break;
                 case 's':
@@ -107,6 +116,22 @@ void fb_printf(size_t x, size_t y, uint32_t color, const char *format, ...) {
     }
     *p = '\0';
     va_end(args);
-    
-    fb_print(buffer, x, y, color);
+
+    kprint(buffer, x, y, color);
+}
+
+// Function to print a hexadecimal number
+void kprint_hex(uint32_t value, size_t x, size_t y, uint32_t color) {
+    char buf[11];
+    itoa(value, buf, 16);
+    kprint("0x", x, y, color);
+    x += 16; // Move to the next position for the number
+    kprint(buf, x, y, color);
+}
+
+// Function to print a decimal number
+void kprint_dec(uint32_t value, size_t x, size_t y, uint32_t color) {
+    char buf[11];
+    itoa(value, buf, 10);
+    kprint(buf, x, y, color);
 }

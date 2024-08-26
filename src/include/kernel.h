@@ -4,13 +4,13 @@
 
 #include "limine.h"
 
-#include "asm.h"
+#include "intrinsics.h"
 #include "hardware_info.h"
 
 #include "init.h"
 
 #include "font.h"
-#include "fb_print.h"
+#include "kprint.h"
 #include "draw_2d.h"
 
 #include "memory.h"

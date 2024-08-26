@@ -2,6 +2,8 @@
 #include <limine.h>
 #include <stddef.h>
 
+#include "kprint.h"
+
 // Limine memory map request
 __attribute__((used, section(".requests")))
 volatile struct limine_memmap_request memmap_request = {
@@ -36,43 +38,12 @@ memory_info_t get_memory_info() {
     return mem_info; // Return the populated structure
 }
 
-// Simple itoa function to convert an integer to a string
-void itoa(uint64_t value, char* str, int base) {
-    char* ptr = str;
-    char* ptr1 = str;
-    char tmp_char;
-    uint64_t tmp_value;
-
-    // Handle zero case
-    if (value == 0) {
-        *ptr++ = '0';
-        *ptr = '\0';
-        return;
-    }
-
-    while (value != 0) {
-        tmp_value = value % base;
-        *ptr++ = (tmp_value < 10) ? (tmp_value + '0') : (tmp_value - 10 + 'A');
-        value /= base;
-    }
-
-    // Null-terminate the string
-    *ptr = '\0';
-
-    // Reverse the string
-    while (ptr1 < --ptr) {
-        tmp_char = *ptr;
-        *ptr = *ptr1;
-        *ptr1++ = tmp_char;
-    }
-}
-
 void print_memory_info() {
     memory_info_t mem_info = get_memory_info();
 
     // Check if the memory map response was valid
     if (mem_info.total_memory == 0) {
-        fb_print("Memory map request not initialized.", 0, 0, 0xFFFFFF);
+        kprint("Memory map request not initialized.", 0, 0, 0xFFFFFF);
         return;
     }
 
@@ -92,11 +63,11 @@ void print_memory_info() {
     itoa(available_memory_mb, available_memory_str, 10);
 
     // Print the results
-    fb_print("Total memory: ", 0, 0, 0xFFFFFF);
-    fb_print(total_memory_str, 160, 0, 0xFFFFFF);
-    fb_print(" MB", 320, 0, 0xFFFFFF);
+    kprint("Total memory: ", 0, 0, 0xFFFFFF);
+    kprint(total_memory_str, 160, 0, 0xFFFFFF);
+    kprint(" MB", 320, 0, 0xFFFFFF);
 
-    fb_print("Available memory: ", 0, 10, 0xFFFFFF);
-    fb_print(available_memory_str, 200, 10, 0xFFFFFF);
-    fb_print(" MB", 320, 10, 0xFFFFFF);
+    kprint("Available memory: ", 0, 10, 0xFFFFFF);
+    kprint(available_memory_str, 200, 10, 0xFFFFFF);
+    kprint(" MB", 320, 10, 0xFFFFFF);
 }
