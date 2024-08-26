@@ -20,7 +20,7 @@ mformat -i image.hdd@@1M
 mmd -i image.hdd@@1M ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine
 
 # Copy over the relevant files.
-mcopy -i image.hdd@@1M bin/myos ::/boot
+mcopy -i image.hdd@@1M bin/kernel ::/boot
 mcopy -i image.hdd@@1M limine.conf limine/limine-bios.sys ::/boot/limine
 mcopy -i image.hdd@@1M limine/BOOTX64.EFI ::/EFI/BOOT
 mcopy -i image.hdd@@1M limine/BOOTIA32.EFI ::/EFI/BOOT

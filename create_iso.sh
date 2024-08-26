@@ -9,7 +9,7 @@ mkdir -p iso_root
 
 # Copy the relevant files over.
 mkdir -p iso_root/boot
-cp -v bin/myos iso_root/boot/
+cp -v bin/kernel iso_root/boot/
 mkdir -p iso_root/boot/limine
 cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin \
       limine/limine-uefi-cd.bin iso_root/boot/limine/
