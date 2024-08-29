@@ -8,11 +8,29 @@ size_t strlen(const char *str)
 	return s - str;
 }
 
-char *strcopy(char *dest, const char *src)
+char *strcpy(char *dest, const char *src)
 {
 	char *d = dest;
 	while ((*d++ = *src++));
 	return dest;
+}
+
+
+char *strncpy(char *dest, const char *src, size_t n) {
+    char *d = dest;
+    const char *s = src;
+    
+    while (n > 0 && *s != '\0') {
+        *d++ = *s++;
+        --n;
+    }
+    
+    while (n > 0) {
+        *d++ = '\0';
+        --n;
+    }
+    
+    return dest;
 }
 
 int strcmp(const char *str1, const char *str2)
