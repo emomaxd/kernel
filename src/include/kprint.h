@@ -9,6 +9,7 @@ int atoi(const char *str);
 
 
 void kprint(const char *str, size_t x, size_t y, uint32_t color);
+void kprintf(size_t x, size_t y, uint32_t color, const char *format, ...);
 void kprint_hex(uint32_t value, size_t x, size_t y, uint32_t color);
 void kprint_dec(uint32_t value, size_t x, size_t y, uint32_t color);
 

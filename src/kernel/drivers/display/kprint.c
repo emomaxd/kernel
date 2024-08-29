@@ -42,11 +42,22 @@ int atoi(const char *str) {
     return result;
 }
 
+#define BACKGROUND_COLOR 0x000000 // Black, or whatever color your background is
+
 // Basic function to put a single character on the framebuffer
 static void put_char(size_t x, size_t y, char c, uint32_t color) {
-    // Ensure the character is within the printable range
+
     if (c < 32 || c > 127) {
-        c = 32; // Default to space if out of range
+        c = ' ';
+    }
+
+    if (c == ' ') {
+        for (size_t row = 0; row < 8; row++) {
+            for (size_t col = 0; col < 8; col++) {
+                framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = BACKGROUND_COLOR;
+            }
+        }
+        return;
     }
 
     // Get the font data for the character
@@ -60,12 +71,16 @@ static void put_char(size_t x, size_t y, char c, uint32_t color) {
         for (size_t col = 0; col < 8; col++) {
             // Check if the bit is set in the bitmap
             if (bitmap & (1 << (7 - col))) {
-                // Set the pixel in the framebuffer
+                // Set the pixel in the framebuffer to the specified color
                 framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = color;
+            } else {
+                // Set the pixel to background color if not part of the glyph
+                framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = BACKGROUND_COLOR;
             }
         }
     }
 }
+
 
 // Function to print a string on the framebuffer
 void kprint(const char *str, size_t x, size_t y, uint32_t color) {

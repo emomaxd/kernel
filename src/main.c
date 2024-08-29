@@ -41,6 +41,9 @@ void kmain(void) {
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
         hcf();
     }
+    
+
+    //idt_init();
 
     // Fetch the first framebuffer
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
@@ -49,7 +52,7 @@ void kmain(void) {
     framebuffer_width = framebuffer->width;
     framebuffer_height = framebuffer->height;
     framebuffer_pitch = framebuffer->pitch / 4; // in pixels
-
+/*
         // Define rectangle parameters
     size_t rect_x = 500;
     size_t rect_y = 500;
@@ -59,8 +62,20 @@ void kmain(void) {
 
     // Draw a rectangle on the framebuffer
     draw_rect(rect_x, rect_y, rect_width, rect_height, rect_color);
-    
-    print_memory_info();
+    */
 
+    __asm__ ("sti");
+    GDT_init();
+
+
+    IDT_init();
+
+    keyboard_init();
+
+    shell_init();
+    shell_run();
+
+    //print_memory_info();
+    
     hcf();
 }
