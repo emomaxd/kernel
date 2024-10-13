@@ -5,6 +5,14 @@
 
 This project involves developing a custom operating system (OS) that includes a bootloader and a kernel. The OS is written in Assembly and C and is intended to run on both real hardware and virtual machines. The project features a basic bootloader using Limine.
 
+## Features to come
+
+- Dynamic Memory Allocation
+- File System
+- Process Scheduling
+- User Space
+- System Calls
+
 ## Building & Running
 
 To run the OS in a virtual environment, simply execute:
