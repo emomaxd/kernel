@@ -24,7 +24,7 @@ memory_info_t get_memory_info() {
 
     // Iterate through memory map entries to gather total and available memory
     for (size_t i = 0; i < response->entry_count; i++) {
-        struct limine_memmap_entry *entry = &response->entries[i];
+        struct limine_memmap_entry *entry = response->entries[i];
 
         // Calculate total memory
         mem_info.total_memory += entry->length;

@@ -44,8 +44,15 @@ static const char readme_text[] =
     "\nShell commands: ls, cat, exec, meminfo, ps, help\n";
 
 static const char motd_text[] =
-    ">> welcome to the void <<\n"
-    "type 'help' for commands\n";
+    "\n"
+    "  _                    _  \n"
+    " | |_  ___ _ _ _ _  __| | \n"
+    " | / -_) '_| ' \\ / -_) | \n"
+    " |_\\___|_| |_||_|\\___|\\_| \n"
+    "\n"
+    " x86-64  |  Limine  |  ring-3  |  no libc\n"
+    " -----------------------------------------\n"
+    "\n";
 
 void ramfs_init(void) {
     memset(files, 0, sizeof(files));

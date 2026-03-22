@@ -42,54 +42,48 @@ int atoi(const char *str) {
     return result;
 }
 
-#define BACKGROUND_COLOR 0x000000 // Black, or whatever color your background is
+#define BACKGROUND_COLOR 0x000000
+#define FONT_SCALE       2
+#define FONT_SIZE        8
+#define CHAR_PIXELS      (FONT_SIZE * FONT_SCALE)
 
-// Basic function to put a single character on the framebuffer
+/* Basic function to put a single character on the framebuffer */
 static void put_char(size_t x, size_t y, char c, uint32_t color) {
+    size_t row, col, sy, sx;
+    uint32_t pixel;
 
-    if (c < 32 || c > 127) {
+    if (c < 32 || c > 127)
         c = ' ';
-    }
 
     if (c == ' ') {
-        for (size_t row = 0; row < 8; row++) {
-            for (size_t col = 0; col < 8; col++) {
+        for (row = 0; row < CHAR_PIXELS; row++)
+            for (col = 0; col < CHAR_PIXELS; col++)
                 framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = BACKGROUND_COLOR;
-            }
-        }
         return;
     }
 
-    // Get the font data for the character
-    const uint8_t* glyph = font[(int)c];
+    const uint8_t *glyph = font[(int)c];
 
-    // Loop through each row (8 rows)
-    for (size_t row = 0; row < 8; row++) {
+    for (row = 0; row < FONT_SIZE; row++) {
         uint8_t bitmap = glyph[row];
-
-        // Loop through each column (8 columns)
-        for (size_t col = 0; col < 8; col++) {
-            // Check if the bit is set in the bitmap
-            if (bitmap & (1 << (7 - col))) {
-                // Set the pixel in the framebuffer to the specified color
-                framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = color;
-            } else {
-                // Set the pixel to background color if not part of the glyph
-                framebuffer_ptr[(y + row) * framebuffer_width + (x + col)] = BACKGROUND_COLOR;
-            }
+        for (col = 0; col < FONT_SIZE; col++) {
+            pixel = (bitmap & (1 << (7 - col))) ? color : BACKGROUND_COLOR;
+            for (sy = 0; sy < FONT_SCALE; sy++)
+                for (sx = 0; sx < FONT_SCALE; sx++)
+                    framebuffer_ptr[(y + row * FONT_SCALE + sy) * framebuffer_width +
+                                   (x + col * FONT_SCALE + sx)] = pixel;
         }
     }
 }
 
-
-// Function to print a string on the framebuffer
+/* Function to print a string on the framebuffer */
 void kprint(const char *str, size_t x, size_t y, uint32_t color) {
     while (*str) {
         put_char(x, y, *str++, color);
-        x += 8; // Move to the next character position
+        x += CHAR_PIXELS;
         if (x >= framebuffer_width) {
             x = 0;
-            y += 16; // Move to the next line
+            y += CHAR_PIXELS;
         }
     }
 }
