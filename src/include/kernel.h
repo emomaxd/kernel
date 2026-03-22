@@ -1,7 +1,6 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-
 #include "limine.h"
 
 #include "io.h"
@@ -25,6 +24,13 @@
 #include "pic.h"
 
 #include "gdt.h"
+
+#include "pmm.h"
+#include "vmm.h"
+#include "timer.h"
+#include "process.h"
+#include "syscall.h"
+#include "ramfs.h"
 
 #include "keyboard.h"
 #include "shell.h"
