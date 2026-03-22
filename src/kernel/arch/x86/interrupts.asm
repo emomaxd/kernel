@@ -1,4 +1,3 @@
-
 %macro PUSHALL 0
     push rax
     push rbx
@@ -76,12 +75,14 @@ irq_common:
             push qword 0                                    ; Push 0 as error code for interrupt without error code
         %endif
         push qword %1                                       ; Push interrupt number
-        %if %1 >= 32
+        %if %1 == 0x80
+            jmp isr_common                                  ; Syscall goes to ISR handler
+        %elif %1 >= 32
             jmp irq_common
         %else
             jmp isr_common
         %endif
-        
+
 %endmacro
 
 ISR 0, 0
