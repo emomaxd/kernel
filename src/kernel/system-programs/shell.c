@@ -12,8 +12,8 @@
 #define SHELL_PROMPT "> "
 #define SHELL_PROMPT_LENGTH 2
 #define SHELL_BUFFER_SIZE 256
-#define CHAR_WIDTH 8
-#define CHAR_HEIGHT 10
+#define CHAR_WIDTH 16
+#define CHAR_HEIGHT 16
 
 static char command_buffer[SHELL_BUFFER_SIZE];
 static uint8_t command_index = 0;
@@ -28,6 +28,8 @@ static void move_cursor_horizontal(int16_t chars);
 static void move_cursor_vertical(uint16_t lines);
 static void execute_command(const char *command);
 static void shell_print(const char *str, uint32_t color);
+static void cmd_meminfo(void);
+static void cmd_ls(void);
 
 static void shell_print(const char *str, uint32_t color) {
     while (*str) {
@@ -65,7 +67,7 @@ static void handle_enter(void) {
 
     move_cursor_vertical(1);
     cursor_x = 0;
-    kprint(SHELL_PROMPT, 0, cursor_y, 0x42f548);
+    kprint(SHELL_PROMPT, 0, cursor_y, 0xCF9FFF);
     cursor_x = SHELL_PROMPT_LENGTH * CHAR_WIDTH;
 }
 
@@ -92,22 +94,22 @@ static void move_cursor_vertical(uint16_t lines) {
 
 static void cmd_help(void) {
     shell_print("commands:\n", 0xFFFFFF);
-    shell_print("  help     - show this\n", 0x808080);
-    shell_print("  ls       - list files\n", 0x808080);
-    shell_print("  cat <f>  - read file\n", 0x808080);
-    shell_print("  exec <f> - run program\n", 0x808080);
-    shell_print("  meminfo  - memory stats\n", 0x808080);
-    shell_print("  ps       - process list\n", 0x808080);
-    shell_print("  uptime   - tick count\n", 0x808080);
-    shell_print("  clear    - clear screen\n", 0x808080);
-    shell_print("  hello    - :)\n", 0x808080);
-    shell_print("  reboot   - reset\n", 0x808080);
+    shell_print("  help     - show this\n", 0x9966CC);
+    shell_print("  ls       - list files\n", 0x9966CC);
+    shell_print("  cat <f>  - read file\n", 0x9966CC);
+    shell_print("  exec <f> - run program\n", 0x9966CC);
+    shell_print("  meminfo  - memory stats\n", 0x9966CC);
+    shell_print("  ps       - process list\n", 0x9966CC);
+    shell_print("  uptime   - tick count\n", 0x9966CC);
+    shell_print("  clear    - clear screen\n", 0x9966CC);
+    shell_print("  hello    - :)\n", 0x9966CC);
+    shell_print("  reboot   - reset\n", 0x9966CC);
 }
 
 static void cmd_ls(void) {
     char buf[1024];
     ramfs_list(buf, sizeof(buf));
-    shell_print(buf, 0x42f548);
+    shell_print(buf, 0xCF9FFF);
 }
 
 static void cmd_cat(const char *filename) {
@@ -116,9 +118,9 @@ static void cmd_cat(const char *filename) {
 
     ramfs_file_t *file = ramfs_open(filename);
     if (!file) {
-        shell_print("file not found: ", 0xFF4444);
-        shell_print(filename, 0xFF4444);
-        shell_print("\n", 0xFF4444);
+        shell_print("file not found: ", 0xFF4466);
+        shell_print(filename, 0xFF4466);
+        shell_print("\n", 0xFF4466);
         return;
     }
 
@@ -136,22 +138,22 @@ static void cmd_exec(const char *filename) {
 
     ramfs_file_t *file = ramfs_open(filename);
     if (!file) {
-        shell_print("file not found: ", 0xFF4444);
-        shell_print(filename, 0xFF4444);
-        shell_print("\n", 0xFF4444);
+        shell_print("file not found: ", 0xFF4466);
+        shell_print(filename, 0xFF4466);
+        shell_print("\n", 0xFF4466);
         return;
     }
 
     if (!file->executable) {
-        shell_print("not executable: ", 0xFF4444);
-        shell_print(filename, 0xFF4444);
-        shell_print("\n", 0xFF4444);
+        shell_print("not executable: ", 0xFF4466);
+        shell_print(filename, 0xFF4466);
+        shell_print("\n", 0xFF4466);
         return;
     }
 
-    shell_print("loading ", 0x42f548);
-    shell_print(filename, 0x42f548);
-    shell_print("...\n", 0x42f548);
+    shell_print("loading ", 0xCF9FFF);
+    shell_print(filename, 0xCF9FFF);
+    shell_print("...\n", 0xCF9FFF);
 
     // For user-mode execution, we need to:
     // 1. Create a new address space
@@ -160,7 +162,7 @@ static void cmd_exec(const char *filename) {
 
     uint64_t *new_pml4 = vmm_create_address_space();
     if (!new_pml4) {
-        shell_print("failed to create address space\n", 0xFF4444);
+        shell_print("failed to create address space\n", 0xFF4466);
         return;
     }
 
@@ -171,7 +173,7 @@ static void cmd_exec(const char *filename) {
     for (size_t i = 0; i < pages_needed; i++) {
         void *page = pmm_alloc_page();
         if (!page) {
-            shell_print("out of memory\n", 0xFF4444);
+            shell_print("out of memory\n", 0xFF4466);
             return;
         }
         vmm_map_page(pml4_virt, USER_CODE_BASE + i * 4096, (uint64_t)page,
@@ -189,7 +191,7 @@ static void cmd_exec(const char *filename) {
     // but we've prepared one — we need to assign it)
     process_t *proc = process_create(filename, (void (*)(void))USER_CODE_BASE, 1);
     if (!proc) {
-        shell_print("failed to create process\n", 0xFF4444);
+        shell_print("failed to create process\n", 0xFF4466);
         return;
     }
 
@@ -214,15 +216,15 @@ static void cmd_exec(const char *filename) {
 
     proc->page_table = new_pml4;
 
-    shell_print("process created: pid ", 0x42f548);
+    shell_print("process created: pid ", 0xCF9FFF);
     char pidbuf[8];
     int pid = proc->pid;
     int pi = 0;
     if (pid >= 10) pidbuf[pi++] = '0' + (pid / 10);
     pidbuf[pi++] = '0' + (pid % 10);
     pidbuf[pi] = '\0';
-    shell_print(pidbuf, 0x42f548);
-    shell_print("\n", 0x42f548);
+    shell_print(pidbuf, 0xCF9FFF);
+    shell_print("\n", 0xCF9FFF);
 }
 
 static void cmd_meminfo(void) {
@@ -230,29 +232,29 @@ static void cmd_meminfo(void) {
 
     shell_print("physical memory:\n", 0xFFFFFF);
 
-    shell_print("  total pages: ", 0x808080);
+    shell_print("  total pages: ", 0x9966CC);
     uint64_t total = pmm_get_total_pages();
     itoa((int)total, buf, 10);
-    shell_print(buf, 0x42f548);
-    shell_print("\n", 0x42f548);
+    shell_print(buf, 0xCF9FFF);
+    shell_print("\n", 0xCF9FFF);
 
-    shell_print("  used pages:  ", 0x808080);
+    shell_print("  used pages:  ", 0x9966CC);
     uint64_t used = pmm_get_used_pages();
     itoa((int)used, buf, 10);
-    shell_print(buf, 0x42f548);
-    shell_print("\n", 0x42f548);
+    shell_print(buf, 0xCF9FFF);
+    shell_print("\n", 0xCF9FFF);
 
-    shell_print("  free pages:  ", 0x808080);
+    shell_print("  free pages:  ", 0x9966CC);
     uint64_t free_p = pmm_get_free_pages();
     itoa((int)free_p, buf, 10);
-    shell_print(buf, 0x42f548);
-    shell_print("\n", 0x42f548);
+    shell_print(buf, 0xCF9FFF);
+    shell_print("\n", 0xCF9FFF);
 
-    shell_print("  total RAM:   ", 0x808080);
+    shell_print("  total RAM:   ", 0x9966CC);
     uint64_t total_mem = pmm_get_total_memory();
     itoa((int)(total_mem / (1024 * 1024)), buf, 10);
-    shell_print(buf, 0x42f548);
-    shell_print(" MB\n", 0x42f548);
+    shell_print(buf, 0xCF9FFF);
+    shell_print(" MB\n", 0xCF9FFF);
 }
 
 static void cmd_ps(void) {
@@ -260,16 +262,16 @@ static void cmd_ps(void) {
     extern int process_list(char *buf, size_t bufsize);
     shell_print("PID STATE NAME\n", 0xFFFFFF);
     process_list(buf, sizeof(buf));
-    shell_print(buf, 0x42f548);
+    shell_print(buf, 0xCF9FFF);
 }
 
 static void cmd_uptime(void) {
     char buf[16];
     uint64_t t = timer_get_ticks();
     itoa((int)(t / 1000), buf, 10);
-    shell_print("uptime: ", 0x808080);
-    shell_print(buf, 0x42f548);
-    shell_print("s\n", 0x42f548);
+    shell_print("uptime: ", 0x9966CC);
+    shell_print(buf, 0xCF9FFF);
+    shell_print("s\n", 0xCF9FFF);
 }
 
 static void cmd_clear(void) {
@@ -287,7 +289,7 @@ static void execute_command(const char *command) {
         return;
 
     if (strcmp(command, "hello") == 0) {
-        shell_print("Hello, world!\n", 0x42f548);
+        shell_print("Hello, world!\n", 0xCF9FFF);
     } else if (strcmp(command, "help") == 0) {
         cmd_help();
     } else if (strcmp(command, "ls") == 0) {
@@ -305,34 +307,40 @@ static void execute_command(const char *command) {
     } else if (strcmp(command, "clear") == 0) {
         cmd_clear();
     } else if (strcmp(command, "reboot") == 0) {
-        shell_print("rebooting...\n", 0xFF4444);
+        shell_print("rebooting...\n", 0xFF4466);
         // Triple fault to reboot
         __asm__ volatile("lidt (%%rax)" : : "a"(0));
     } else if (strcmp(command, "poweroff") == 0) {
-        shell_print("shutting down...\n", 0xFF4444);
+        shell_print("shutting down...\n", 0xFF4466);
         extern void acpi_shutdown(void);
         acpi_shutdown();
     } else {
-        shell_print("unknown: ", 0xFF4444);
-        shell_print(command, 0xFF4444);
-        shell_print("\n", 0xFF4444);
+        shell_print("unknown: ", 0xFF4466);
+        shell_print(command, 0xFF4466);
+        shell_print("\n", 0xFF4466);
     }
 }
 
 void shell_init(void) {
-    // Print MOTD
+    /* Print MOTD */
     ramfs_file_t *motd = ramfs_open("motd.txt");
     if (motd) {
         char buf[256];
         int n = ramfs_read(motd, (uint8_t *)buf, 0, sizeof(buf) - 1);
         if (n > 0) {
             buf[n] = '\0';
-            shell_print(buf, 0x42f548);
+            shell_print(buf, 0xCF9FFF);
         }
     }
 
+    /* Auto-display system info on boot */
+    cmd_meminfo();
     move_cursor_vertical(1);
-    kprint(SHELL_PROMPT, 0, cursor_y, 0x42f548);
+    shell_print("files:\n", 0xFFFFFF);
+    cmd_ls();
+
+    move_cursor_vertical(1);
+    kprint(SHELL_PROMPT, 0, cursor_y, 0xCF9FFF);
     command_index = 0;
     cursor_x = SHELL_PROMPT_LENGTH * CHAR_WIDTH;
 }
