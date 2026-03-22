@@ -1,6 +1,7 @@
 #include "isr.h"
 #include "kprint.h"
 #include "io.h"
+#include "syscall.h"
 
 char* exception_messages[] = {
     "Division By Zero",
@@ -35,17 +36,21 @@ char* exception_messages[] = {
     "Reserved",
     "Reserved",
     "Reserved",
-    "Timer",
 };
 
 InterruptRegisters* ISR_handler(InterruptRegisters* regs) {
+    if (regs->interrupt == 0x80) {
+        // Syscall from user mode
+        return syscall_handler(regs);
+    }
+
     if (regs->interrupt < 32) {
-        kprint("Unhandled Interrupt",0, 300, 0xffffff);
-		kprint("Exception",60, 300, 0xffffff);
-        panic("\nCPU Panic");
-    } else if (regs->interrupt > 32) {
-		kprint("Interrupt",0, 140, 0xffffff);
-        outb(0x60, 0);
+        kprint("Exception: ", 0, 300, 0xFF4444);
+        if (regs->interrupt < 32) {
+            kprint(exception_messages[regs->interrupt], 88, 300, 0xFF4444);
+        }
+        kprint("System halted", 0, 320, 0xFF4444);
+        panic("CPU Exception");
     }
 
     return regs;
