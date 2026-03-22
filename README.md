@@ -50,7 +50,7 @@ No libc. No shortcuts.
 
 ## Boot
 
-![](git/OS_output_qemu.png)
+![](.assets/ring3_boot.png)
 
 ---
 
