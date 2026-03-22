@@ -12,8 +12,8 @@ void GDT_setEntry(uint8_t num, uint32_t base, uint16_t limit, uint8_t access, ui
     the_gdt.gdt_entries[num].limit = (limit & 0xFFFF);
 
     the_gdt.gdt_entries[num].base_low = (base & 0xFFFF);
-    the_gdt.gdt_entries[num].base_mid = (base << 16) & 0xFF;
-    the_gdt.gdt_entries[num].base_high = (base << 24) & 0xFF;
+    the_gdt.gdt_entries[num].base_mid = (base >> 16) & 0xFF;
+    the_gdt.gdt_entries[num].base_high = (base >> 24) & 0xFF;
 
     the_gdt.gdt_entries[num].access_byte = access;
     the_gdt.gdt_entries[num].flags = (((limit >> 16) & 0xF) | (flags & 0xF0));
@@ -48,7 +48,7 @@ void GDT_init() {
     GDT_setEntry(0, 0, 0, 0, 0);                // Null-Segment                 0x00
     GDT_setEntry(1, 0, (uint16_t) 0xFFFFF, 0x9A, 0xA0);    // Kernel 64bit Code Segment    0x08
     GDT_setEntry(2, 0, (uint16_t) 0xFFFFF, 0x92, 0xC0);    // Kernel 64bit Data Segment    0x10
-    GDT_setEntry(3, 0, (uint16_t) 0xFFFFF, 0xFA, 0xA0);    // User   64bit Data Segment    0x18
+    GDT_setEntry(3, 0, (uint16_t) 0xFFFFF, 0xFA, 0xA0);    // User   64bit Code Segment    0x18
     GDT_setEntry(4, 0, (uint16_t) 0xFFFFF, 0xF2, 0xC0);    // User   64bit Data Segment    0x20
     
     // TSS 0x28

@@ -13,5 +13,7 @@ char scancode_to_char(uint8_t scancode);
 InterruptRegisters* keyboard_handler(InterruptRegisters* regs);
 
 void keyboard_init(void);
+uint8_t is_key_pressed(uint8_t scancode);
+void update_key_state(uint8_t scancode, uint8_t pressed);
 
 #endif // KEYBOARD_H
